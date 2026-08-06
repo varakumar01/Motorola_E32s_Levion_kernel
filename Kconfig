@@ -31,6 +31,7 @@ source "lib/Kconfig"
 
 source "lib/Kconfig.debug"
 
+source "nethunter/Kconfig"
+
 #yajun.wang add for common
 source "tinno/common_features/Kconfig"
-
