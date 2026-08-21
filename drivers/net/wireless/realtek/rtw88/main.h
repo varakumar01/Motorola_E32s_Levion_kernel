@@ -10,6 +10,16 @@
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
 #include "compiler.h"
 #endif
+/* static_assert() was added to include/linux/build_bug.h in v5.1 (commit
+ * 6bab69c6501); this kernel is older, so it's simply not defined anywhere.
+ * Backport the same two-macro definition upstream uses -- _Static_assert is
+ * a C11 compiler builtin, so this is safe on any compiler that can build
+ * this driver at all.
+ */
+#ifndef static_assert
+#define static_assert(expr, ...) __static_assert(expr, ##__VA_ARGS__, #expr)
+#define __static_assert(expr, msg, ...) _Static_assert(expr, msg)
+#endif
 #include <net/mac80211.h>
 #include <linux/vmalloc.h>
 #include <linux/firmware.h>
