@@ -985,8 +985,10 @@ static
 void rtw8703b_iqk_config_mac(struct rtw_dev *rtwdev,
 			     const struct rtw8723x_iqk_backup_regs *backup)
 {
+	int i;
+
 	rtw_write8(rtwdev, rtw8723x_common.iqk_mac8_regs[0], 0x3F);
-	for (int i = 1; i < RTW8723X_IQK_MAC8_REG_NUM; i++)
+	for (i = 1; i < RTW8723X_IQK_MAC8_REG_NUM; i++)
 		rtw_write8(rtwdev, rtw8723x_common.iqk_mac8_regs[i],
 			   backup->mac8[i] & (~BIT(3)));
 }
@@ -1549,6 +1551,7 @@ static void rtw8703b_pwrtrack_set_cck_pwr(struct rtw_dev *rtwdev, s8 swing_idx,
 					  s8 txagc_idx)
 {
 	struct rtw_dm_info *dm_info = &rtwdev->dm_info;
+	int i;
 
 	dm_info->txagc_remnant_cck = txagc_idx;
 
@@ -1557,7 +1560,7 @@ static void rtw8703b_pwrtrack_set_cck_pwr(struct rtw_dev *rtwdev, s8 swing_idx,
 	BUILD_BUG_ON(ARRAY_SIZE(rtw8703b_cck_pwr_regs)
 		     != ARRAY_SIZE(rtw8703b_cck_swing_table[0]));
 
-	for (int i = 0; i < ARRAY_SIZE(rtw8703b_cck_pwr_regs); i++)
+	for (i = 0; i < ARRAY_SIZE(rtw8703b_cck_pwr_regs); i++)
 		rtw_write8(rtwdev, rtw8703b_cck_pwr_regs[i],
 			   rtw8703b_cck_swing_table[swing_idx][i]);
 }
