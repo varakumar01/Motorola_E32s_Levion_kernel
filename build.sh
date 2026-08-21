@@ -264,18 +264,34 @@ if [ "${BUILD_MODULES}" -eq 1 ]; then
     # NOTE: no separate `make modules` step — the .ko files are already produced
     # by the main kernel build above (same as the OP9 script). Going straight to
     # modules_install, matching the exact command that works on this tree.
+    #
+    # Wipe any previous INSTALL_MOD_PATH tree first. modules_install namespaces
+    # its output under lib/modules/<kernelrelease>/, and <kernelrelease> embeds
+    # the current commit hash (e.g. 4.19.191-gXXXXXXX-dirty) — every commit
+    # produces a DIFFERENT directory, and old ones are never cleaned up on
+    # their own. Left alone, a later build picking "whichever directory comes
+    # first" (as this script used to) can silently grab a stale one from a
+    # previous run instead of the kernel that was just built — the .ko files
+    # would all still exist, just be the wrong (older) ones, with nothing here
+    # to flag it.
+    rm -rf "${BUILD_MODULES_DIR}"
     yellow "[*] Installing modules → ${BUILD_MODULES_DIR}..."
     mkdir -p "${BUILD_MODULES_DIR}"
     make "${MAKE_FLAGS[@]}" modules_install INSTALL_MOD_PATH="${BUILD_MODULES_DIR}"
     green "[✓] Modules installed → ${BUILD_MODULES_DIR}"
 
     # depmod stages everything under lib/modules/<kernelrelease>/ — locate it
-    # (kernelrelease varies per build; the 'kernel' subfolder name underneath
-    # it does not — that's where modules_install actually places the .ko
-    # files, mirroring the source tree, e.g. kernel/drivers/.../foo.ko)
-    KMOD_SUBDIR="$(find "${BUILD_MODULES_DIR}/lib/modules" -mindepth 1 -maxdepth 1 -type d | head -n1)"
-    if [ -z "${KMOD_SUBDIR}" ]; then
-        red "[✗] Could not locate lib/modules/<kernelrelease> under ${BUILD_MODULES_DIR}"
+    # via the kernelrelease this exact build just produced (rather than
+    # guessing at a directory listing) so it can never point at a stale
+    # kernelrelease even if one somehow still exists.
+    KERNELRELEASE="$(cat "${KDIR}/out/include/config/kernel.release" 2>/dev/null)"
+    if [ -z "${KERNELRELEASE}" ]; then
+        red "[✗] Could not read kernelrelease from out/include/config/kernel.release"
+        exit 1
+    fi
+    KMOD_SUBDIR="${BUILD_MODULES_DIR}/lib/modules/${KERNELRELEASE}"
+    if [ ! -d "${KMOD_SUBDIR}" ]; then
+        red "[✗] Expected module staging dir not found: ${KMOD_SUBDIR}"
         exit 1
     fi
     yellow "    Found module staging dir: ${KMOD_SUBDIR}"
