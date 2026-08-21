@@ -1194,3 +1194,17 @@ static const struct rtw_txpwr_lmt_cfg_pair rtw8723d_txpwr_lmt[] = {
 };
 
 RTW_DECL_TABLE_TXPWR_LMT(rtw8723d_txpwr_lmt);
+
+/* rtw8723d.c and rtw8723d_table.c build as two separate loadable modules
+ * (see Makefile), but the RTW_DECL_TABLE_* macros above only give these
+ * tables normal (intra-module) C linkage. Export them so rtw8723d.ko can
+ * actually resolve them at module-load time.
+ */
+EXPORT_SYMBOL(rtw8723d_mac_tbl);
+EXPORT_SYMBOL(rtw8723d_agc_tbl);
+EXPORT_SYMBOL(rtw8723d_bb_tbl);
+EXPORT_SYMBOL(rtw8723d_bb_pg_tbl);
+EXPORT_SYMBOL(rtw8723d_rf_a_tbl);
+EXPORT_SYMBOL(rtw8723d_txpwr_lmt_tbl);
+
+MODULE_LICENSE("Dual BSD/GPL");

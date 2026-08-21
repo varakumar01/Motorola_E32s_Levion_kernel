@@ -22202,3 +22202,22 @@ static const struct rtw_txpwr_lmt_cfg_pair rtw8822b_txpwr_lmt_type5[] = {
 };
 
 RTW_DECL_TABLE_TXPWR_LMT(rtw8822b_txpwr_lmt_type5);
+
+/* rtw8822b.c and rtw8822b_table.c build as two separate loadable modules
+ * (see Makefile), but the RTW_DECL_TABLE_* macros above only give these
+ * tables normal (intra-module) C linkage. Export them so rtw8822b.ko can
+ * actually resolve them at module-load time.
+ */
+EXPORT_SYMBOL(rtw8822b_mac_tbl);
+EXPORT_SYMBOL(rtw8822b_agc_tbl);
+EXPORT_SYMBOL(rtw8822b_bb_tbl);
+EXPORT_SYMBOL(rtw8822b_bb_pg_type2_tbl);
+EXPORT_SYMBOL(rtw8822b_bb_pg_type3_tbl);
+EXPORT_SYMBOL(rtw8822b_bb_pg_type5_tbl);
+EXPORT_SYMBOL(rtw8822b_rf_a_tbl);
+EXPORT_SYMBOL(rtw8822b_rf_b_tbl);
+EXPORT_SYMBOL(rtw8822b_txpwr_lmt_type0_tbl);
+EXPORT_SYMBOL(rtw8822b_txpwr_lmt_type2_tbl);
+EXPORT_SYMBOL(rtw8822b_txpwr_lmt_type5_tbl);
+
+MODULE_LICENSE("Dual BSD/GPL");
