@@ -397,6 +397,10 @@ config NETHUNTER_WIFI_DRIVERS_SUPPORT
 
 	select MT7601U
 
+	select MT76x0U
+
+	select MT76x2U
+
 	select WLAN_VENDOR_RALINK
 
 	select RT2X00
@@ -438,6 +442,18 @@ config NETHUNTER_WIFI_DRIVERS_SUPPORT
 	select ZD1211RW
 
 	select USB_NET_RNDIS_WLAN
+
+	select MAC80211_HWSIM
+
+	# RTW88, RTL8188EU (rtl8188eus) and 88XXAU are deliberately NOT select-ed
+	# here. NETHUNTER_WIFI_DRIVERS_SUPPORT is a tristate that forces every
+	# 'select'-ed symbol built-in when it resolves to y, but these three OOT
+	# Realtek drivers must stay loadable modules (=m) -- see
+	# drivers/staging/rtl8188eus, drivers/staging/rtl8812au and
+	# drivers/net/wireless/realtek/rtw88 for why (duplicate EXPORT_SYMBOLs
+	# between OOT drivers built-in together, and shared USB IDs between
+	# 88XXau and rtw88's 881xAU support). The defconfig enables them
+	# directly as modules instead.
 
 config NETHUNTER_CAN_SUBSYSTEM_SUPPORT
 
