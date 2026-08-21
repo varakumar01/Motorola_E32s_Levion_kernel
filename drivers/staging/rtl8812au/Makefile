@@ -6,7 +6,12 @@ EXTRA_CFLAGS += -Wno-unused-label
 #EXTRA_CFLAGS += -Wno-unused-parameter
 EXTRA_CFLAGS += -Wno-unused-function
 EXTRA_CFLAGS += -Wno-implicit-fallthrough
+# -Wcast-function-type isn't recognized by every clang this driver gets built
+# with (e.g. clang 11) -- probe for real compiler support instead of assuming
+# it, so an unsupported flag doesn't hard-fail the build under -Werror.
+ifeq ($(shell $(CC) -Wno-cast-function-type -Werror -c -x c /dev/null -o /dev/null 2>/dev/null && echo y),y)
 EXTRA_CFLAGS += -Wno-cast-function-type
+endif
 EXTRA_CFLAGS += -Wno-missing-declarations
 EXTRA_CFLAGS += -Wno-missing-prototypes
 #EXTRA_CFLAGS += -Wno-error=cast-function-type

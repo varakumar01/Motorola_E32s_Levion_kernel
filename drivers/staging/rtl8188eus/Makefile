@@ -8,7 +8,12 @@ EXTRA_CFLAGS += -Wno-unused-parameter
 EXTRA_CFLAGS += -Wno-unused-function
 EXTRA_CFLAGS += -Wno-unused
 EXTRA_CFLAGS += -Wno-address
+# -Wcast-function-type isn't recognized by every clang this driver gets built
+# with (e.g. clang 11) -- probe for real compiler support instead of assuming
+# it, so an unsupported flag doesn't hard-fail the build under -Werror.
+ifeq ($(shell $(CC) -Wno-cast-function-type -Werror -c -x c /dev/null -o /dev/null 2>/dev/null && echo y),y)
 EXTRA_CFLAGS += -Wno-cast-function-type
+endif
 #EXTRA_CFLAGS += -Wno-discarded-qualifiers
 EXTRA_CFLAGS += -Wno-uninitialized
 EXTRA_CFLAGS += -Wno-sometimes-uninitialized
