@@ -7,6 +7,34 @@
 #include "rtw8822c.h"
 #include "rtw8822c_table.h"
 
+/* rtw8822c.c and rtw8822c_table.c build as two separate loadable modules
+ * (see Makefile). rtw8822c_parse_tbl_dpk used to live in rtw8822c.c and be
+ * called from here as the RTW_DECL_TABLE_DPK .parse callback, which made
+ * this module and rtw8822c.ko depend on each other -- rtw8822c.ko needs the
+ * *_tbl data below, and this module needed rtw8822c_parse_tbl_dpk from
+ * rtw8822c.ko. depmod refuses to install a module pair with a circular
+ * dependency ("Cycle detected"), so the function (and the small struct it
+ * needs) moved here instead: it's only ever used as the .parse callback for
+ * the DPK tables in this same file, so keeping it local removes the cycle.
+ */
+struct dpk_cfg_pair {
+	u32 addr;
+	u32 bitmask;
+	u32 data;
+};
+
+static void rtw8822c_parse_tbl_dpk(struct rtw_dev *rtwdev,
+				   const struct rtw_table *tbl)
+{
+	const struct dpk_cfg_pair *p = tbl->data;
+	const struct dpk_cfg_pair *end = p + tbl->size / 3;
+
+	BUILD_BUG_ON(sizeof(struct dpk_cfg_pair) != sizeof(u32) * 3);
+
+	for (; p < end; p++)
+		rtw_write32_mask(rtwdev, p->addr, p->bitmask, p->data);
+}
+
 static const u32 rtw8822c_mac[] = {
 };
 
@@ -46103,3 +46131,23 @@ static const u32 rtw8822c_array_mp_cal_init[] = {
 };
 
 RTW_DECL_TABLE_PHY_COND(rtw8822c_array_mp_cal_init, rtw_phy_cfg_bb);
+
+/* rtw8822c.c and rtw8822c_table.c build as two separate loadable modules
+ * (see Makefile), but the RTW_DECL_TABLE_* macros above only give these
+ * tables normal (intra-module) C linkage. Export them so rtw8822c.ko can
+ * actually resolve them at module-load time.
+ */
+EXPORT_SYMBOL(rtw8822c_mac_tbl);
+EXPORT_SYMBOL(rtw8822c_agc_tbl);
+EXPORT_SYMBOL(rtw8822c_bb_tbl);
+EXPORT_SYMBOL(rtw8822c_bb_pg_type0_tbl);
+EXPORT_SYMBOL(rtw8822c_rf_a_tbl);
+EXPORT_SYMBOL(rtw8822c_rf_b_tbl);
+EXPORT_SYMBOL(rtw8822c_txpwr_lmt_type0_tbl);
+EXPORT_SYMBOL(rtw8822c_txpwr_lmt_type5_tbl);
+EXPORT_SYMBOL(rtw8822c_dpk_afe_no_dpk_tbl);
+EXPORT_SYMBOL(rtw8822c_dpk_afe_is_dpk_tbl);
+EXPORT_SYMBOL(rtw8822c_dpk_mac_bb_tbl);
+EXPORT_SYMBOL(rtw8822c_array_mp_cal_init_tbl);
+
+MODULE_LICENSE("Dual BSD/GPL");

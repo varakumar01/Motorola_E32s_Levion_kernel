@@ -3152,23 +3152,9 @@ static void rtw8822c_bf_config_bfee(struct rtw_dev *rtwdev, struct rtw_vif *vif,
 		rtw_warn(rtwdev, "wrong bfee role\n");
 }
 
-struct dpk_cfg_pair {
-	u32 addr;
-	u32 bitmask;
-	u32 data;
-};
-
-void rtw8822c_parse_tbl_dpk(struct rtw_dev *rtwdev,
-			    const struct rtw_table *tbl)
-{
-	const struct dpk_cfg_pair *p = tbl->data;
-	const struct dpk_cfg_pair *end = p + tbl->size / 3;
-
-	BUILD_BUG_ON(sizeof(struct dpk_cfg_pair) != sizeof(u32) * 3);
-
-	for (; p < end; p++)
-		rtw_write32_mask(rtwdev, p->addr, p->bitmask, p->data);
-}
+/* rtw8822c_parse_tbl_dpk (and its struct dpk_cfg_pair) lives in
+ * rtw8822c_table.c, not here -- see the comment there for why.
+ */
 
 static void rtw8822c_dpk_set_gnt_wl(struct rtw_dev *rtwdev, bool is_before_k)
 {
