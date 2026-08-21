@@ -74,6 +74,14 @@ CONFIG_NETHUNTER_SUPPORT=y
 # Pin it to 'm' explicitly so those selects only force module (=m), matching
 # every other WiFi driver in this defconfig.
 CONFIG_NETHUNTER_WIFI_DRIVERS_SUPPORT=m
+# NETHUNTER_HID_SUPPORT (also default y if NETHUNTER_SUPPORT) selects
+# HID_PICOLCD_BACKLIGHT, a bool that requires BACKLIGHT_CLASS_DEVICE=y
+# (not =m -- it's linked in built-in). That framework was never turned on
+# in this defconfig, so HID_PICOLCD_BACKLIGHT was building in referencing
+# backlight_device_register/_unregister with nothing providing them --
+# an undefined-symbol link failure for the whole kernel, not just WiFi.
+CONFIG_BACKLIGHT_LCD_SUPPORT=y
+CONFIG_BACKLIGHT_CLASS_DEVICE=y
 CONFIG_BT=y
 CONFIG_CFG80211=y
 CONFIG_NL80211_TESTMODE=y
